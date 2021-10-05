@@ -1,37 +1,49 @@
 #include "main.h"
 
 /**
- * _printf - Receives the main string
- * and all the necessary params to print a formated string
- * @format: String containing all the desired characters
- * Return: Total count of the characters printed
+ *_printf - Print a formatted string
+ *@format: format string
+ *Return: number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	int printed_chars;
-	conver_t f_list[] = {
-		{"c", print_char},
-		{"s", print_string},
-		{"%", print_percent},
-		{"d", print_integer},
-		{"i", print_integer},
-		{"b", print_binary},
-		{"r", print_reversed},
-		{"R", rot13},
-		{"u", unsigned_integer},
-		{"o", print_octal},
-		{"x", print_hex},
-		{"X", print_heX},
-		{NULL, NULL}
-	};
-	va_list arg_list;
+	int count = 0;
+	va_list list;
+	char *pointer, *start;
+	param_func flags = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-	if (format == NULL)
+	va_start(list, format);
+
+	if (!format || (format[0] == '%' && !format[1]))
 		return (-1);
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
+		return (-1);
+	for (pointer = (char *)format; *pointer; pointer++)
+	{
+		init_params(&flags, list);
+		if (*pointer != '%')
+		{
+			count += _putchar(*pointer);
+			continue;
+		}
+		start = pointer;
+		pointer++;
+		while (get_flags(pointer, &flags))
+		{
+			pointer++;
+		}
+		pointer = get_width(pointer, &flags, list);
+		pointer = get_precision(pointer, &flags, list);
+		if (get_mods(pointer, &flags))
+			pointer++;
 
-	va_start(arg_list, format);
-	/*calling parser function*/
-	printed_chars = parser(format, f_list, arg_list);
-	va_end(arg_list);
-	return (printed_chars);
+		if (!func_parse(pointer))
+			count += print_range(start, pointer,
+			flags.l_mod || flags.h_mod ? pointer - 1 : 0);
+		else
+			count += print_func(pointer, list, &flags);
+	}
+	_putchar(-1);
+	va_end(list);
+	return (count);
 }
