@@ -39,7 +39,7 @@ int _printf(const char *format, ...)
 
 		if (!func_parse(pointer))
 			count += print_range(start, pointer,
-			flags.l_mod || flags.h_mod ? pointer - 1 : 0);
+					flags.l_mod || flags.h_mod ? pointer - 1 : 0);
 		else
 			count += print_func(pointer, list, &flags);
 	}
